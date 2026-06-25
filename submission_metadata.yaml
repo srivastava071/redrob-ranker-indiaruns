@@ -1,0 +1,97 @@
+# Redrob Hackathon — Submission Metadata
+# India Runs / Data & AI Challenge — Intelligent Candidate Discovery & Ranking
+#
+# NOTE: fields marked  <<< FILL >>>  are the only ones you must edit before
+# submitting (team identity, repo URL, sandbox URL, your compute box). Every
+# other field already reflects this codebase truthfully.
+
+# ============================================================================
+# Team identity
+# ============================================================================
+team_name: "MindSpark"
+
+primary_contact:
+  name: "Himanshu Srivastava"
+  email: "srivastavahimanshu071@gmail.com"
+  phone: "+91-9311415530"
+
+team_members:
+  - name: "Himanshu Srivastava"
+    email: "srivastavahimanshu071@gmail.com"
+    role: "Team Leader / ML Engineer"
+  # Add more members as needed; solo participants list just one member.
+
+# ============================================================================
+# Code and reproducibility
+# ============================================================================
+github_repo: "<<< FILL: https://github.com/YOUR_USERNAME/redrob-ranker >>>"
+
+sandbox_link: "<<< FILL: https://huggingface.co/spaces/YOUR_USERNAME/redrob-ranker >>>"
+# app.py is a ready-to-deploy Streamlit demo (CPU, no secrets, fully offline
+# TF-IDF backend). Deploy to HF Spaces or Streamlit Community Cloud as-is.
+
+reproduce_command: "python rank.py --candidates ./candidates.jsonl --out ./submission.csv --no-embeddings"
+# Single command, end-to-end, ~65s on one CPU core for the full 100k pool.
+# (--no-embeddings selects the deterministic offline TF-IDF semantic backend,
+#  which is exactly what produced the submitted submission.csv. Dropping the
+#  flag enables the optional pre-computed-embedding path; see README.)
+
+# ============================================================================
+# Compute environment
+# ============================================================================
+compute:
+  platform: "<<< FILL: e.g. Local Linux box / AWS EC2 c5.4xlarge >>>"
+  cpu_cores: 1                                  # ranking is single-core; ~65s on 1 core
+  ram_gb: 16
+  python_version: "3.11"                        # tested on 3.11 (3.8+ supported)
+  os: "<<< FILL: e.g. Ubuntu 22.04 LTS >>>"
+  uses_gpu_for_inference: false                 # CPU only at rank time
+  has_network_during_ranking: false            # no API/LLM calls during ranking
+  pre_computation_required: false               # TF-IDF path needs none
+  pre_computation_time_minutes: 0               # (optional embedding path adds offline pre-compute)
+
+# ============================================================================
+# AI tools declaration  (transparency only — declared use is NOT penalized)
+# ============================================================================
+ai_tools_used:
+  - "Claude"
+
+ai_usage_summary: |
+  Claude (Anthropic) was used as a pair-programming and code-review assistant:
+  to discuss the scoring architecture, draft and refactor Python modules, run
+  diagnostics on the ranking distribution, and tune weights/thresholds against
+  the JD. All design decisions were reviewed and validated by the team against
+  the official validator and the challenge spec. No candidate data was sent to
+  any hosted LLM during ranking — the ranking pipeline is fully offline and
+  contains no LLM calls.
+
+# ============================================================================
+# Approach summary
+# ============================================================================
+methodology_summary: |
+  Interpretable hybrid ranker. Every candidate gets a transparent base-fit
+  score: a weighted blend of title+career relevance (0.26), plain-language
+  career evidence (0.22), endorsement/duration-weighted skill trust (0.18),
+  semantic similarity to the JD (0.14), experience-band fit (0.10), location
+  (0.06) and education (0.04). On top of base-fit we apply explicit, JD-mapped
+  multipliers: a keyword-stuffer gate (non-technical career collapses the title
+  signal), a services-only penalty, a CV/speech-distractor penalty, a
+  stopped-coding penalty, a small product-company bonus, and a hard honeypot
+  penalty. A separate additive behavioral modifier (availability, recruiter
+  responsiveness, recency, notice period) re-ranks *within* a quality tier and
+  sharply down-weights genuine "ghosts" — but is deliberately bounded so it
+  never lets a weaker-fit profile leapfrog a clearly stronger one. The semantic
+  component is what surfaces plain-language Tier-5 candidates who built the
+  right systems without using buzzwords. Honeypots are detected via internal
+  impossibility checks and removed from the shortlist. Runtime ~65s for 100k
+  candidates on one CPU core, no GPU, no network.
+
+# ============================================================================
+# Declarations
+# ============================================================================
+declarations:
+  read_submission_spec: true
+  code_is_original_work: true
+  no_collusion: true
+  honeypot_check_done: true        # explicit impossibility checks + top-100 guard
+  reproduction_tested: true

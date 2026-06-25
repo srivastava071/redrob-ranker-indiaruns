@@ -1,0 +1,11 @@
+# Core ranking pipeline (CPU-only, no network needed at rank time)
+numpy>=1.24
+scikit-learn>=1.3          # TF-IDF semantic fallback (always available)
+
+# Optional: primary semantic backend via pre-computed embeddings.
+# build_embeddings.py uses these; rank.py only needs the resulting .npy file.
+# Comment these out if you run the TF-IDF path exclusively (--no-embeddings).
+sentence-transformers>=2.2 ; python_version >= "3.8"
+
+# Optional: hosted sandbox demo (app.py). Not used during ranking.
+streamlit>=1.30
